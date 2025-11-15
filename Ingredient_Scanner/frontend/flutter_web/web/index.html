@@ -68,6 +68,19 @@
                   }
 
                   ingDiv.innerHTML = '<div class="ingredient">' + ingredients + '</div>';
+
+                  // Print nutriments as a table if available
+                  if (data.raw && data.raw.nutriments) {
+                    const nutriments = data.raw.nutriments;
+                    let tableHtml = '<table style="margin-top:16px;border-collapse:collapse;width:100%;background:#eaf7ff;">';
+                    tableHtml += '<tr style="background:#bde0fe;"><th style="border:1px solid #90caf9;padding:6px;">Nutrient</th><th style="border:1px solid #90caf9;padding:6px;">Value</th></tr>';
+                    for (const [key, value] of Object.entries(nutriments)) {
+                      tableHtml += `<tr><td style="border:1px solid #90caf9;padding:6px;">${key}</td><td style="border:1px solid #90caf9;padding:6px;">${value}</td></tr>`;
+                    }
+                    tableHtml += '</table>';
+                    ingDiv.innerHTML += tableHtml;
+                  }
+
                   // Print raw value from response
                   const rawDiv = document.createElement('div');
                   rawDiv.style.marginTop = '16px';
