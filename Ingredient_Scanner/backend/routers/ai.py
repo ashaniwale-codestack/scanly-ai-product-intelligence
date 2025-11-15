@@ -1,6 +1,6 @@
 from fastapi import APIRouter
-from services.ai_processor import analyze_ingredients
-from services.product_lookup import fetch_product
+from ..services.ai_processor import analyze_ingredients
+from ..services.product_lookup import fetch_product
 
 router = APIRouter(prefix="/ai", tags=["AI"])
 

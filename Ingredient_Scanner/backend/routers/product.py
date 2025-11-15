@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from services.product_lookup import fetch_product
+from ..services.product_lookup import fetch_product
 
 router = APIRouter(prefix="/product", tags=["Product"])
 

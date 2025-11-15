@@ -1,0 +1,19 @@
+{
+  "$schema": "https://schemas.lingo.dev/i18n",
+
+  "projectId": "Ingredient Scanner",
+
+  "input": {
+    "path": "./assets/i18n",
+    "languages": ["en", "hi"],
+    "format": "json"
+  },
+
+  "output": {
+    "path": "./assets/i18n",
+    "languages": ["en", "hi"],
+    "format": "json"
+  },
+
+  "include": ["./lib/**/*"]
+}

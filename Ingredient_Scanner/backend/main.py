@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from routers import product, ai, auth
+from .routers import product, ai, auth
 
 app = FastAPI(title="Ingredient Scanner Backend")
 

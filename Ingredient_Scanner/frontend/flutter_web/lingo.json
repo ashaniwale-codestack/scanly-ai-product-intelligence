@@ -1,0 +1,6 @@
+{
+  "input": "lib/l10n/*.arb",
+  "output": "lib/l10n/",
+  "languages": ["en", "es", "fr","hi"],
+  "defaultLanguage": "en"
+}

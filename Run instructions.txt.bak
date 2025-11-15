@@ -1,0 +1,82 @@
+
+Run Backend Project
+go to root folder and run
+
+cd D:\Project\Hackthon\Ingredient_Scanner
+# (optional) create + activate venv (recommended once) 
+# run powershell using admin
+python -m venv .venv .\.venv\Scripts\Activate.ps1 
+
+# install backend deps
+pip install -r backend\requirements.txt
+
+# run backend (run as package so 'routers' imports resolve)
+uvicorn backend.main:app --reload --host 127.0.0.1 --port 8000
+python -m uvicorn backend.main:app --reload --host 127.0.0.1 --port 8000
+
+
+
+Run Frontedn
+flutter pub get
+
+
+
+
+
+
+Get-ChildItem -Force .venv
+# show permissions on folder (if exists)
+if (Test-Path .\.venv) { Get-Acl .\.venv | Format-List }
+
+pip install -r requirements.txt
+
+
+ai_ingredient_scanner/
+│
+├── backend/
+│   ├── main.py
+│   ├── requirements.txt
+│   ├── README.md
+│   ├── routers/
+│   │     ├── product.py
+│   │     └── ai.py
+│   ├── services/
+│   │     ├── product_lookup.py
+│   │     └── ai_processor.py
+│   └── utils/
+│         └── http_client.py
+│
+└── frontend/
+    └── flutter_web/
+        ├── lib/
+        │   ├── main.dart
+        │   ├── pages/
+        │   │     ├── home_page.dart
+        │   │     └── scanner_page.dart
+        │   ├── services/
+        │   │     └── product_api.dart
+        │   └── widgets/
+        │         └── product_card.dart
+        │
+        ├── web/
+        │   ├── index.html
+        │   └── scanner.js
+        │
+        ├── pubspec.yaml
+        └── README.md
+
+
+
+
+npx lingo.dev login --api-key v5t6ydad06mln8gn1pph9kxd
+
+npx lingo.dev push --input lib/l10n --output lib/l10n
+
+
+lingo.dev login --api-key api_lkrwf42aahdp7z2cntkshtgy
+
+
+LINGO_API_KEY=api_lkrwf42aahdp7z2cntkshtgy
+
+
+sudo chown -R $(whoami):$(whoami) ~/projects/Ingredient_Scanner
