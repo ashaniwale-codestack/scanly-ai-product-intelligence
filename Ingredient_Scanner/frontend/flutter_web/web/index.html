@@ -10,19 +10,61 @@
     video { max-width: 100%; max-height: 100%; border: 2px solid #333; }
     #message { font-size: 18px; color: #333; }
     .ingredient { margin: 10px 0; padding: 8px; background-color: #e0ffe0; border-radius: 5px; border: 1px solid #0f0; }
+    select { margin-bottom: 10px; padding: 4px; font-size: 16px; }
   </style>
 </head>
 <body>
+   
   <div class="container">
     <div class="camera-column">
       <video id="videoPreview" autoplay></video>
     </div>
     <div class="message-column">
+      <div>
+        <label for="langSelect">Select Language: </label>
+        <select id="langSelect">
+          <option value="en">English</option>
+          <option value="fr">French</option>
+          <option value="es">Spanish</option>
+          <option value="de">German</option>          
+          <option value="hi">Hindi</option>
+        </select>
+      </div>
       <div id="message">Scan a product barcode...</div>
       <div id="ingredients"></div>
     </div>
   </div>
+  <script>
+    // let i18n = {};
 
+    // async function loadLanguage(lang) {
+    //   try {
+    //     const res = await fetch(`lib/i10n/${lang}.json`);
+    //     i18n = await res.json();
+    //     updateLabels();
+    //   } catch (err) {
+    //     console.error("Failed to load i18n file", err);
+    //   }
+    // }
+
+    function updateLabels() {
+      document.getElementById("message").innerText = i18n.scan_message;
+      document.querySelector("label[for='langSelect']").innerText = i18n.select_language + ":";
+      // Update other static labels if needed
+    }
+
+    document.getElementById("langSelect").addEventListener("change", async () => {
+      const lang = document.getElementById("langSelect").value;
+      lastBarcode = null; // reset so product is fetched in new language
+        if (lastBarcode) {
+        fetchProductInLanguage(lastBarcode, lang);
+         }
+      //await loadLanguage(lang);
+    });
+
+    // Initialize labels on page load
+    //loadLanguage(document.getElementById("langSelect").value);
+  </script>
   <script>
     const codeReader = new ZXing.BrowserMultiFormatReader();
 
@@ -36,17 +78,21 @@
         const deviceId = devices[0].deviceId;
 
         let lastBarcode = null;
+
         codeReader.decodeFromVideoDevice(deviceId, "videoPreview", async (result, err) => {
           if (result) {
             const barcode = result.text;
             if (barcode !== lastBarcode) {
               lastBarcode = barcode;
+
+              const lang = document.getElementById("langSelect").value;
+
               document.getElementById("message").innerText = "Scanned: " + barcode + " — fetching data...";
               const ingDiv = document.getElementById("ingredients");
               ingDiv.innerHTML = ""; // Clear previous ingredients
 
               try {
-                const response = await fetch("http://127.0.0.1:8000/product/" + encodeURIComponent(barcode));
+                const response = await fetch(`http://127.0.0.1:8000/product/${encodeURIComponent(barcode)}?lang=${lang}`);
                 if (!response.ok) throw new Error("Network response was not ok");
 
                 const data = await response.json();
@@ -57,7 +103,6 @@
                 } else {
                   document.getElementById("message").innerText = "Product: " + (data.name ?? "Unknown");
 
-                  // Use raw.ingredients if data.ingredients is "Not available"
                   let ingredients = data.ingredients;
                   if (!ingredients || ingredients.toLowerCase() === "not available") {
                     if (data.raw && data.raw.ingredients_text) {
@@ -69,7 +114,6 @@
 
                   ingDiv.innerHTML = '<div class="ingredient">' + ingredients + '</div>';
 
-                  // Print nutriments as a table if available
                   if (data.raw && data.raw.nutriments) {
                     const nutriments = data.raw.nutriments;
                     let tableHtml = '<table style="margin-top:16px;border-collapse:collapse;width:100%;background:#eaf7ff;">';
@@ -81,7 +125,6 @@
                     ingDiv.innerHTML += tableHtml;
                   }
 
-                  // Print raw value from response
                   const rawDiv = document.createElement('div');
                   rawDiv.style.marginTop = '16px';
                   rawDiv.style.fontSize = '14px';
@@ -104,6 +147,13 @@
             console.error(err);
           }
         });
+
+        // Reset lastBarcode when language changes so it refetches
+        document.getElementById("langSelect").addEventListener("change", () => {
+          lastBarcode = null;
+          let currentLang = 'en';
+        });
+
       } catch (e) {
         console.error(e);
         document.getElementById("message").innerText = "Error initializing scanner";
