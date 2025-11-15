@@ -1,9 +1,8 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter
 from services.product_lookup import fetch_product
-from .auth import get_current_user
 
 router = APIRouter(prefix="/product", tags=["Product"])
 
 @router.get("/{barcode}")
-async def get_product(barcode: str, user=Depends(get_current_user)):
+async def get_product(barcode: str):
     return await fetch_product(barcode)

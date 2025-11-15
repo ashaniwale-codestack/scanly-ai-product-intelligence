@@ -1,57 +1,67 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_inappwebview/flutter_inappwebview.dart';
-import '../services/product_api.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class ScannerPage extends StatefulWidget {
+  const ScannerPage({super.key}); // can stay const if you want
+
   @override
-  State<ScannerPage> createState() => _ScannerPageState();
+  _ScannerPageState createState() => _ScannerPageState();
 }
 
 class _ScannerPageState extends State<ScannerPage> {
-  late InAppWebViewController controller;
-  String barcode = "";
-  Map<String, dynamic>? product;
+  String barcode = '';
+  String productName = '';
+  String ingredients = '';
+
+  Future<void> fetchProduct(String code) async {
+    final url = Uri.parse('http://127.0.0.1:8000/product/$code');
+    try {
+      final response = await http.get(url);
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        setState(() {
+          productName = data['name'] ?? 'Unknown';
+          ingredients = data['ingredients'] ?? 'No ingredient info';
+        });
+      } else {
+        setState(() {
+          productName = 'Error fetching product';
+          ingredients = '';
+        });
+      }
+    } catch (e) {
+      setState(() {
+        productName = 'Network error';
+        ingredients = '';
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Scan a Product")),
-      body: Column(
-        children: [
-          Expanded(
-            child: InAppWebView(
-              onWebViewCreated: (c) {
-                controller = c;
-
-                c.addJavaScriptHandler(
-                  handlerName: "onBarcodeScanned",
-                  callback: (args) async {
-                    barcode = args[0];
-                    product = await ProductAPI.fetchProduct(barcode);
-                    setState(() {});
-                    return null;
-                  },
-                );
-
-                c.loadHtml(
-                  """
-                  <video id="videoPreview" style="width:100%;height:100%;"></video>
-                  <script src="scanner.js"></script>
-                  <script>
-                      startScanner('onBarcodeScanned');
-                  </script>
-                  """,
-                );
+      appBar: AppBar(title: const Text('Ingredient Scanner')),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          children: [
+            TextField(
+              decoration: const InputDecoration(
+                labelText: 'Enter Barcode',
+                border: OutlineInputBorder(),
+              ),
+              onSubmitted: (value) {
+                barcode = value;
+                fetchProduct(barcode);
               },
             ),
-          ),
-
-          if (product != null)
-            Padding(
-              padding: EdgeInsets.all(16),
-              child: Text(product.toString()),
-            )
-        ],
+            const SizedBox(height: 20),
+            Text('Product: $productName', style: const TextStyle(fontSize: 18)),
+            const SizedBox(height: 10),
+            Text('Ingredients: $ingredients', style: const TextStyle(fontSize: 16)),
+          ],
+        ),
       ),
     );
   }

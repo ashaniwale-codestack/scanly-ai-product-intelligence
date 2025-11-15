@@ -1,10 +1,103 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <script src="https://unpkg.com/@zxing/library@latest"></script>
-    <script src="scanner.js"></script>
-  </head>
-  <body>
-    <script src="main.dart.js"></script>
-  </body>
+<head>
+  <script src="https://unpkg.com/@zxing/library@0.19.1"></script>
+  <style>
+    body { margin: 0; font-family: Arial, sans-serif; }
+    .container { display: flex; height: 100vh; width: 100vw; }
+    .camera-column { flex: 1; display: flex; justify-content: center; align-items: center; background-color: #000; }
+    .message-column { flex: 1; padding: 20px; background-color: #f1f1f1; overflow-y: auto; }
+    video { max-width: 100%; max-height: 100%; border: 2px solid #333; }
+    #message { font-size: 18px; color: #333; }
+    .ingredient { margin: 10px 0; padding: 8px; background-color: #e0ffe0; border-radius: 5px; border: 1px solid #0f0; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="camera-column">
+      <video id="videoPreview" autoplay></video>
+    </div>
+    <div class="message-column">
+      <div id="message">Scan a product barcode...</div>
+      <div id="ingredients"></div>
+    </div>
+  </div>
+
+  <script>
+    const codeReader = new ZXing.BrowserMultiFormatReader();
+
+    async function startScanner() {
+      try {
+        const devices = await codeReader.listVideoInputDevices();
+        if (devices.length === 0) {
+          document.getElementById("message").innerText = "No camera devices found";
+          return;
+        }
+        const deviceId = devices[0].deviceId;
+
+        let lastBarcode = null;
+        codeReader.decodeFromVideoDevice(deviceId, "videoPreview", async (result, err) => {
+          if (result) {
+            const barcode = result.text;
+            if (barcode !== lastBarcode) {
+              lastBarcode = barcode;
+              document.getElementById("message").innerText = "Scanned: " + barcode + " — fetching data...";
+              const ingDiv = document.getElementById("ingredients");
+              ingDiv.innerHTML = ""; // Clear previous ingredients
+
+              try {
+                const response = await fetch("http://127.0.0.1:8000/product/" + encodeURIComponent(barcode));
+                if (!response.ok) throw new Error("Network response was not ok");
+
+                const data = await response.json();
+
+                if (data.error) {
+                  document.getElementById("message").innerText = "Product not found";
+                  ingDiv.innerHTML = "";
+                } else {
+                  document.getElementById("message").innerText = "Product: " + (data.name ?? "Unknown");
+
+                  // Use raw.ingredients if data.ingredients is "Not available"
+                  let ingredients = data.ingredients;
+                  if (!ingredients || ingredients.toLowerCase() === "not available") {
+                    if (data.raw && data.raw.ingredients_text) {
+                      ingredients = data.raw.ingredients_text;
+                    } else {
+                      ingredients = "Ingredients not available";
+                    }
+                  }
+
+                  ingDiv.innerHTML = '<div class="ingredient">' + ingredients + '</div>';
+                  // Print raw value from response
+                  const rawDiv = document.createElement('div');
+                  rawDiv.style.marginTop = '16px';
+                  rawDiv.style.fontSize = '14px';
+                  rawDiv.style.background = '#fffbe0';
+                  rawDiv.style.border = '1px solid #ff0';
+                  rawDiv.style.padding = '8px';
+                  rawDiv.style.borderRadius = '5px';
+                  rawDiv.innerText = 'Raw value: ' + JSON.stringify(data.raw, null, 2);
+                  ingDiv.appendChild(rawDiv);
+                }
+
+              } catch (fetchError) {
+                console.error("Fetch error:", fetchError);
+                document.getElementById("message").innerText = "Error fetching product data";
+                ingDiv.innerHTML = "";
+              }
+            }
+          }
+          if (err && !(err instanceof ZXing.NotFoundException)) {
+            console.error(err);
+          }
+        });
+      } catch (e) {
+        console.error(e);
+        document.getElementById("message").innerText = "Error initializing scanner";
+      }
+    }
+
+    startScanner();
+  </script>
+</body>
 </html>
