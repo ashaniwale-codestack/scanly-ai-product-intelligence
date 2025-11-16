@@ -3,14 +3,129 @@
 <head>
   <script src="https://unpkg.com/@zxing/library@0.19.1"></script>
   <style>
-    body { margin: 0; font-family: Arial, sans-serif; }
-    .container { display: flex; height: 100vh; width: 100vw; }
-    .camera-column { flex: 1; display: flex; justify-content: center; align-items: center; background-color: #000; }
-    .message-column { flex: 1; padding: 20px; background-color: #f1f1f1; overflow-y: auto; }
-    video { max-width: 100%; max-height: 100%; border: 2px solid #333; }
-    #message { font-size: 18px; color: #333; }
-    .ingredient { margin: 10px 0; padding: 8px; background-color: #e0ffe0; border-radius: 5px; border: 1px solid #0f0; }
-    select { margin-bottom: 10px; padding: 4px; font-size: 16px; }
+ body {
+    margin: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f9f9f9;
+  }
+
+  .container {
+    display: flex;
+    height: 100vh;
+    width: 100vw;
+  }
+
+  .camera-column {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #000;
+  position: relative; /* important for overlay positioning */
+  border-right: 2px solid #ccc;
+}
+
+.overlay-logo {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-size: 40px;
+  font-weight: bold;
+  color: #00ff99;       /* bright neon green */
+  text-shadow: 2px 2px 6px rgba(0,0,0,0.7); /* adds depth */
+  opacity: 0.85;
+  pointer-events: none;  /* won’t block camera clicks */
+}
+
+.overlay-logo img {
+  width: 120px; /* adjust as needed */
+  height: auto;
+  opacity: 0.9;
+}
+
+  video {
+    max-width: 100%;
+    max-height: 100%;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.5);
+  }
+
+  .message-column {
+  flex: 1;
+  padding: 20px;
+  background: linear-gradient(160deg, #f1f1f1, #e0f7ff);
+  overflow-y: auto;
+  border-left: 3px solid #00ff99;
+}
+
+#message {
+  font-size: 20px;
+  font-weight: 500;
+  color: #333;
+  margin-bottom: 12px;
+  min-height: 40px;
+}
+
+.ingredient {
+  margin: 10px 0;
+  padding: 10px;
+  background-color: #e0ffe0;
+  border-radius: 8px;
+  border-left: 4px solid #00aa00;
+  transition: transform 0.2s;
+}
+
+.ingredient:hover {
+  transform: scale(1.03);
+  background-color: #ccffcc;
+}
+table {
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+#ingredients > div:last-child {
+  border-radius: 8px;
+}
+.message-column {
+  scroll-behavior: smooth;
+}
+  select {
+    margin-bottom: 10px;
+    padding: 6px 8px;
+    font-size: 16px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+    background-color: #fff;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+    background-color: #f0f8ff;
+  }
+
+  table th, table td {
+    border: 1px solid #90caf9;
+    padding: 6px;
+    text-align: left;
+  }
+
+  table th {
+    background-color: #b3e5fc;
+  }
+
+  /* subtle highlight for raw data */
+  #ingredients > div:last-child {
+    margin-top: 16px;
+    font-size: 14px;
+    background: #fffbe0;
+    border: 1px solid #ffeb3b;
+    padding: 8px;
+    border-radius: 5px;
+  }
   </style>
 </head>
 <body>
@@ -18,6 +133,7 @@
   <div class="container">
     <div class="camera-column">
       <video id="videoPreview" autoplay></video>
+      <div class="overlay-logo">Scanly</div>
     </div>
     <div class="message-column">
       <div>
@@ -30,7 +146,7 @@
           <option value="hi">Hindi</option>
         </select>
       </div>
-      <div id="message">Scan a product barcode...</div>
+      <div id="message">Snap the barcode, know your food.</div>
       <div id="ingredients"></div>
     </div>
   </div>
@@ -64,6 +180,18 @@
 
     // Initialize labels on page load
     //loadLanguage(document.getElementById("langSelect").value);
+    const messages = [
+  "🔍 Point, Scan, Discover!",
+  "🍎 Know your food instantly",
+  "Your nutrition, one scan away",
+  "Scan it. Know it. Love it."
+];
+
+let msgIndex = 0;
+setInterval(() => {
+  document.getElementById("message").innerText = messages[msgIndex];
+  msgIndex = (msgIndex + 1) % messages.length;
+}, 3000); // changes every 3 seconds
   </script>
   <script>
     const codeReader = new ZXing.BrowserMultiFormatReader();

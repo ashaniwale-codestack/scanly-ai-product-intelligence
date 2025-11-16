@@ -67,3 +67,29 @@ node_modules/
 
 # dataconnect generated files
 .dataconnect
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+
+# Flutter/Dart
+.dart_tool/
+build/
+node_modules/
+*.lock
+
+# Firebase Hosting
+public/
+firebase.json
+
+# VSCode
+.vscode/
+
+# OS/Editor
+.DS_Store
+Thumbs.db
+
+# Other
+translations/
+assets/*.json
