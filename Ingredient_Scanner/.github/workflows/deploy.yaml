@@ -1,0 +1,91 @@
+name: Build & Deploy App
+
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+jobs:
+
+  translations:
+    name: Pull Lingo Translations
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Set up Node (for Lingo CLI)
+        uses: actions/setup-node@v3
+        with:
+          node-version: "18"
+
+      - name: Install Lingo CLI
+        run: npm install -g lingo-cli
+
+      - name: Pull translations from Lingo
+        run: lingo pull --api-key ${{ secrets.LINGO_API_KEY }}
+
+      - name: Commit updated translation files
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git add i18n/*
+          git commit -m "Auto-update translations from Lingo" || echo "No changes"
+          git push
+
+  flutter-web:
+    name: Build Flutter Web
+    runs-on: ubuntu-latest
+    needs: translations
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+
+      - name: Install dependencies
+        working-directory: ./frontend
+        run: flutter pub get
+
+      - name: Build Flutter Web
+        working-directory: ./frontend
+        run: flutter build web --release
+
+      - name: Upload Flutter build
+        uses: actions/upload-artifact@v3
+        with:
+          name: flutter-build
+          path: frontend/build/web
+
+  deploy-pages:
+    name: Deploy Flutter Web to GitHub Pages
+    runs-on: ubuntu-latest
+    needs: flutter-web
+
+    steps:
+      - uses: actions/download-artifact@v3
+        with:
+          name: flutter-build
+          path: web-build
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: web-build
+
+  deploy-backend:
+    name: Deploy FastAPI Backend to Render
+    runs-on: ubuntu-latest
+    needs: translations
+
+    steps:
+      - name: Trigger Render Deploy
+        run: |
+          curl -X POST "https://api.render.com/v1/services/${{ secrets.RENDER_SERVICE_ID }}/deploys" \
+          -H "Authorization: Bearer ${{ secrets.RENDER_API_KEY }}" \
+          -H "Content-Type: application/json"
