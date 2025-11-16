@@ -16,8 +16,10 @@ python -m uvicorn backend.main:app --reload --host 127.0.0.1 --port 8000
 
 
 
-Run Frontedn
+Run Frontend
+# from the flutter_web folder (requires Flutter SDK installed)
 flutter pub get
+flutter run -d chrome
 
 
 
@@ -80,3 +82,15 @@ LINGO_API_KEY=api_lkrwf42aahdp7z2cntkshtgy
 
 
 sudo chown -R $(whoami):$(whoami) ~/projects/Ingredient_Scanner
+
+
+
+8652625378
+MultiLangScanner
+https://MultiLangScanner.web.app
+
+https://multilanscanner.web.app/
+
+
+http://127.0.0.1:8000/product
+http://localhost:52317/

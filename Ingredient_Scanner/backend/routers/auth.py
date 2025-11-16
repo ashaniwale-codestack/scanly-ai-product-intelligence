@@ -19,7 +19,8 @@ class User(BaseModel):
 fake_users_db = {
     "testuser": {
         "username": "testuser",
-        "hashed_password": pwd_context.hash("testpass")
+        # Hash once, copy the result here
+        "hashed_password": "$2b$12$A2Jr4/5qkzOe3/..."  
     }
 }
 

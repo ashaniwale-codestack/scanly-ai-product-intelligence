@@ -2,6 +2,9 @@
 Run Backend Project
 go to root folder and run
 
+pip install uvicorn
+
+
 cd D:\Project\Hackthon\Ingredient_Scanner
 # (optional) create + activate venv (recommended once) 
 # run powershell using admin
@@ -82,3 +85,15 @@ LINGO_API_KEY=api_lkrwf42aahdp7z2cntkshtgy
 
 
 sudo chown -R $(whoami):$(whoami) ~/projects/Ingredient_Scanner
+
+
+
+8652625378
+MultiLangScanner
+https://MultiLangScanner.web.app
+
+https://multilanscanner.web.app/
+
+
+http://127.0.0.1:8000/product
+http://localhost:52317/
