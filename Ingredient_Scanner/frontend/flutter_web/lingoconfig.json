@@ -1,5 +1,6 @@
 {
-  "sourceLanguage": "en",
-  "languages": ["es"],
-  "output": "translations"
+  "input": "lib/l10n/*.arb",
+  "output": "lib/l10n/",
+  "languages": ["en", "es", "fr","hi"],
+  "defaultLanguage": "en"
 }
